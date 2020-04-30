@@ -26,5 +26,14 @@ module.exports = {
       console.log(error);
       return false;
     }
+  },
+  updateUser: async (update, id) => {
+    try {
+      await User.findOneAndUpdate({ _id: id }, { $set: update });
+      const updated = await User.findById(id);
+      return updated;
+    } catch (error) {
+      return false;
+    }
   }
 };
