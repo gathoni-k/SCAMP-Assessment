@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 require('dotenv').config();
 
 const { MONGOURITEST } = process.env;
-const { createUser, deleteUser, updateUser } = require('../src/api/components/Users/db');
+const { createUser, deleteUser, updateUser, getUser } = require('../src/api/components/Users/db');
 const User = require('../src/api/components/Users/model');
 // connect to db
 beforeAll(async () => {
@@ -70,11 +70,28 @@ describe('Update user', () => {
   const update = {
     name: 'Jan Gathoni'
   };
-  it('should update user', async () => {
+  it('should update user', async (done) => {
     const newUser = await createUser(user);
     const userId = newUser.id;
     const updatedUser = await updateUser(update, userId);
     expect(updatedUser.name).toBe(update.name);
+    done();
+  });
+});
+
+describe('Get user', () => {
+  const user = {
+    name: 'Mary Gathoni',
+    email: 'maryg@email.com',
+    password: 'P@ssworder#',
+    role: 'admin'
+  };
+  it('should get user', async (done) => {
+    const newUser = await createUser(user);
+    const userId = newUser.id;
+    const gotUser = await getUser(userId);
+    expect(gotUser.name).toBe(user.name);
+    done();
   });
 });
 async function removeAllCollections() {
