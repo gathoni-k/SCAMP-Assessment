@@ -1,0 +1,60 @@
+const mongoose = require('mongoose');
+require('dotenv').config();
+const request = require('supertest');
+const app = require('../src/app')
+const { MONGOURITEST } = process.env;
+
+// connect to db
+beforeAll(async () => {
+  await mongoose.connect(`${MONGOURITEST}/testRoutes`, { useNewUrlParser: true, useUnifiedTopology: true });
+});
+
+describe('POST /users/signup', () => {
+  const user = {
+    name: 'Mary Gathoni',
+    email: 'mary@email.com',
+    password: 'P@ssworder#',
+    role: 'admin'
+  };
+  it('should register user', async (done) => {
+    try {
+      const res = await request(app).post('/user/signup')
+        .send(user);
+      expect(res.status).toBe(201);
+      expect(res.body.user.name).toBe(user.name);
+      done();
+    } catch (error) {
+      done(error);
+    }
+  });
+});
+
+async function removeAllCollections() {
+  const collections = Object.keys(mongoose.connection.collections);
+  for (const collectionName of collections) {
+    const collection = mongoose.connection.collections[collectionName];
+    await collection.deleteMany();
+  }
+}
+  
+async function dropAllCollections () {
+  const collections = Object.keys(mongoose.connection.collections)
+  for (const collectionName of collections) {
+    const collection = mongoose.connection.collections[collectionName]
+    try {
+      await collection.drop()
+    } catch (error) {
+      console.log(error.message)
+      return
+    }
+  }
+}
+  
+afterEach(async () => {
+  await removeAllCollections();
+});
+
+afterAll(async () => {
+  await dropAllCollections();
+  await mongoose.connection.close();
+});
