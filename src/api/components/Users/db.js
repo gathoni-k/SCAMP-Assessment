@@ -19,11 +19,9 @@ module.exports = {
   },
   deleteUser: async (id) => {
     try {
-      let deletedUser = await User.findByIdAndDelete(id);
-      if (!deletedUser) throw new Error('could not delete');
+      await User.findByIdAndDelete(id);
       return true;
     } catch (error) {
-      console.log(error);
       return false;
     }
   },
@@ -32,6 +30,14 @@ module.exports = {
       await User.findOneAndUpdate({ _id: id }, { $set: update });
       const updated = await User.findById(id);
       return updated;
+    } catch (error) {
+      return false;
+    }
+  },
+  getUser: async (id) => {
+    try {
+      const user = await User.findById(id);
+      return user;
     } catch (error) {
       return false;
     }
