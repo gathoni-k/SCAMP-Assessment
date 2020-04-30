@@ -16,5 +16,15 @@ module.exports = {
     } catch (error) {
       return false;
     }
+  },
+  deleteUser: async (id) => {
+    try {
+      let deletedUser = await User.findByIdAndDelete(id);
+      if (!deletedUser) throw new Error('could not delete');
+      return true;
+    } catch (error) {
+      console.log(error);
+      return false;
+    }
   }
 };
