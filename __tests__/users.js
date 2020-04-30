@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 require('dotenv').config();
 
 const { MONGOURITEST } = process.env;
-const { createUser } = require('../src/api/components/Users/db');
+const { createUser, deleteUser } = require('../src/api/components/Users/db');
 const User = require('../src/api/components/Users/model');
 // connect to db
 beforeAll(async () => {
@@ -41,6 +41,22 @@ describe('should not save user in db', () => {
     };
     const createdUser = await createUser(faultyUser);
     expect(createdUser).toBeFalsy();
+  });
+});
+
+describe('Delete user', () => {
+  const user = {
+    name: 'Mary Gathoni',
+    email: 'maryg@email.com',
+    password: 'P@ssworder#',
+    role: 'admin'
+  };
+  it('should ', async (done) => {
+    const newUser = await createUser(user);
+    const userId = newUser.id;
+    const deletedUser = await deleteUser(userId);
+    expect(deletedUser).toBeTruthy();
+    done();
   });
 });
 
