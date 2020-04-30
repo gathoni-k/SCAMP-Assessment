@@ -18,7 +18,7 @@ describe('POST /users/signup', () => {
   };
   it('should register user', async (done) => {
     try {
-      const res = await request(app).post('/user/signup')
+      const res = await request(app).post('api/user/signup')
         .send(user);
       expect(res.status).toBe(201);
       expect(res.body.user.name).toBe(user.name);
