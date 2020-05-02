@@ -1,7 +1,9 @@
 const mongoose = require('mongoose');
 require('dotenv').config();
 const request = require('supertest');
-const app = require('../src/app')
+const app = require('../src/app');
+const { createUser } = require('../src/api/components/Users/db');
+
 const { MONGOURITEST } = process.env;
 
 // connect to db
@@ -12,13 +14,13 @@ beforeAll(async () => {
 describe('POST /users/signup', () => {
   const user = {
     name: 'Mary Gathoni',
-    email: 'mary@email.com',
+    email: 'maeryre@email.com',
     password: 'P@ssworder#',
     role: 'admin'
   };
   it('should register user', async (done) => {
     try {
-      const res = await request(app).post('api/user/signup')
+      const res = await request(app).post('/api/user/signup')
         .send(user);
       expect(res.status).toBe(201);
       expect(res.body.user.name).toBe(user.name);
@@ -29,6 +31,23 @@ describe('POST /users/signup', () => {
   });
 });
 
+describe('POST /auth/login', () => {
+  it('should return accesstoken', async () => {
+    const user = {
+      name: 'Mary Gathoni',
+      email: 'maeryre@email.com',
+      password: 'P@ssworder#',
+      role: 'admin'
+    };
+    await createUser(user);
+    const res = await request(app).post('/api/user/auth/login')
+      .send({ email: user.email, password: user.password })
+      .expect(200);
+    expect(res.body.err).toBeFalsy();
+    expect(res.body.accessToken).toBeTruthy();
+  });
+});
+
 async function removeAllCollections() {
   const collections = Object.keys(mongoose.connection.collections);
   for (const collectionName of collections) {
@@ -36,7 +55,7 @@ async function removeAllCollections() {
     await collection.deleteMany();
   }
 }
-  
+
 async function dropAllCollections () {
   const collections = Object.keys(mongoose.connection.collections)
   for (const collectionName of collections) {
@@ -49,12 +68,11 @@ async function dropAllCollections () {
     }
   }
 }
-  
+
 afterEach(async () => {
   await removeAllCollections();
 });
 
 afterAll(async () => {
   await dropAllCollections();
-  await mongoose.connection.close();
 });
