@@ -112,12 +112,10 @@ async function dropAllCollections () {
       if (error.message === 'ns not found') return
       if (error.message.includes('a background operation is currently running')) return
       console.log(error.message)
-    }
-      console.log(error.message)
       return
     }
+    }
   }
-}
 
 afterEach(async () => {
   await removeAllCollections();
