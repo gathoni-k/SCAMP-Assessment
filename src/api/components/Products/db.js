@@ -3,23 +3,8 @@ const Product = require('./model');
 module.exports = {
   createProduct: async (product) => {
     try {
-      const { productName,
-        productLabel,
-        startingInventory,
-        inventoryReceived,
-        inventorySold,
-        inventoryOnHand,
-        minimumRequired } = product;
       // create new Product
-      const newProduct = new Product({
-        productName,
-        productLabel,
-        startingInventory,
-        inventoryReceived,
-        inventorySold,
-        inventoryOnHand,
-        minimumRequired
-      });
+      const newProduct = new Product(product);
       await newProduct.save();
       return newProduct;
     } catch (error) {
@@ -38,6 +23,9 @@ module.exports = {
     try {
       await Product.findOneAndUpdate({ _id: id }, { $set: update });
       const updated = await Product.findById(id);
+      if (!updated) {
+        throw new Error();
+      }
       return updated;
     } catch (error) {
       return false;
@@ -46,6 +34,9 @@ module.exports = {
   getProduct: async (id) => {
     try {
       const product = await Product.findById(id);
+      if (!product) {
+        throw new Error();
+      }
       return product;
     } catch (error) {
       return false;
@@ -54,7 +45,21 @@ module.exports = {
   getProducts: async () => {
     try {
       const products = await Product.find({});
+      if (!products.length) {
+        return false;
+      }
       return products;
+    } catch (error) {
+      return false;
+    }
+  },
+  productExists: async (id) => {
+    try {
+      const exists = await Product.findById(id);
+      if (!exists) {
+        throw new Error();
+      }
+      return true;
     } catch (error) {
       return false;
     }
