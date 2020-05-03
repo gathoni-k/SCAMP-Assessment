@@ -9,6 +9,7 @@ const {
   updateProduct,
   getProduct,
   getProducts,
+  productExists
 } = require('../src/api/components/Products/db');
 const Product = require('../src/api/components/Products/model');
 
@@ -94,6 +95,22 @@ describe('Get all products', () => {
     await createProduct(otherProduct);
     const products = getProducts();
     expect(products).toBeTruthy();
+    done();
+  });
+});
+
+describe('CHeck if product exists', () => {
+  let productId
+  it('should return true', async (done) => {
+    const newProduct = await createProduct(product);
+    productId = newProduct.id;
+    const exists = await productExists(productId);
+    expect(exists).toBe(true);
+    done();
+  });
+  it('should return false', async (done) => {
+    const exists = await productExists(`${productId}p`);
+    expect(exists).toBe(false);
     done();
   });
 });
