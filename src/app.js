@@ -13,6 +13,10 @@ const routes = require('./api/routes');
 // middlewares
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use('/api/user', routes);
+
+// routes
+app.use('/api/user', routes.userRoutes);
+app.use('/api/product', routes.productRoutes);
+
 
 module.exports = app;
