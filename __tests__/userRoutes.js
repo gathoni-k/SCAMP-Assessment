@@ -75,4 +75,5 @@ afterEach(async () => {
 
 afterAll(async () => {
   await dropAllCollections();
+  await mongoose.connection.close();
 });
