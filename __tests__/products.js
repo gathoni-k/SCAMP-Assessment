@@ -3,16 +3,34 @@ require('dotenv').config();
 
 const { MONGOURITEST } = process.env;
 
-const { createProduct, deleteProduct, updateProduct, getProduct } = require('../src/api/components/Products/db');
+const {
+  createProduct,
+  deleteProduct,
+  updateProduct,
+  getProduct,
+  getProducts,
+} = require('../src/api/components/Products/db');
 const Product = require('../src/api/components/Products/model');
 
 // connect to db
 beforeAll(async () => {
-  await mongoose.connect(`${MONGOURITEST}/testProduct`, { useNewUrlParser: true, useUnifiedTopology: true });
+  await mongoose.connect(`${MONGOURITEST}/testProduct`, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  });
 });
 
 const product = {
   productName: 'Coke 300ml(can)',
+  productLabel: 'Coke',
+  startingInventory: 100,
+  inventoryOnHand: 100,
+  inventoryReceived: 100,
+  minimumRequired: 20
+};
+
+const otherProduct = {
+  productName: 'Sprite 300ml(can)',
   productLabel: 'Coke',
   startingInventory: 100,
   inventoryOnHand: 100,
@@ -70,6 +88,15 @@ describe('Get product', () => {
   });
 });
 
+describe('Get all products', () => {
+  it('should return all products ', async (done) => {
+    await createProduct(product);
+    await createProduct(otherProduct);
+    const products = getProducts();
+    expect(products).toBeTruthy();
+    done();
+  });
+});
 async function removeAllCollections() {
   const collections = Object.keys(mongoose.connection.collections);
   for (const collectionName of collections) {
