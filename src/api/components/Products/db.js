@@ -50,5 +50,13 @@ module.exports = {
     } catch (error) {
       return false;
     }
+  },
+  getProducts: async () => {
+    try {
+      const products = await Product.find({});
+      return products;
+    } catch (error) {
+      return false;
+    }
   }
 };
