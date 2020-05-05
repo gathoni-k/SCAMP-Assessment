@@ -26,9 +26,44 @@ const otherProduct = {
   minimumRequired: 20
 };
 
-// connect to db
-beforeAll(async () => {
+const adminUser = {
+  name: 'Mary Gathoni',
+  email: 'maeryre@email.com',
+  password: 'P@ssworder#',
+  role: 'admin'
+};
+const salesUser = {
+  name: 'Mary Gathoni',
+  email: 'mare@email.com',
+  password: 'P@ssworder#',
+  role: 'sales'
+};
+
+const login = async (user) => {
+  try {
+    const res = await request(app).post('/api/user/auth/login')
+      .send({ email: user.email, password: user.password });
+    return res.body.accessToken;
+  } catch (error) {
+    console.log(error)
+  }
+};
+
+beforeAll(async (done) => {
   await mongoose.connect(`${MONGOURITEST}/testProductRoutes`, { useNewUrlParser: true, useUnifiedTopology: true });
+  done();
+});
+
+beforeEach(async (done) => {
+  try {
+    // signup
+    await request(app)
+      .post('/api/user/signup')
+      .send(salesUser);
+    done();
+  } catch (error) {
+    done(error);
+  }
 });
 
 describe('GET /product/all', () => {
@@ -72,13 +107,29 @@ describe('GET /product/one/:productId', () => {
 describe('POST /api/product/create', () => {
   it('should not create product', async (done) => {
     const res = await request(app)
-      .post('/api/product/create');
+      .post('/api/product/create')
+      .send(product);
     expect(res.body.product).toBeFalsy();
     done();
   });
-  it('should return created product', async (done) => {
+  it('should not return created product if admin not logged in', async (done) => {
+    const token = await login(salesUser);
     const res = await request(app)
       .post('/api/product/create')
+      .set('Authorization', `Bearer ${token}`)
+      .send(product)
+      .expect(401);
+    expect(res.body.message).toBe('Unauthorized, admins only');
+    done();
+  });
+  it('should return created product if admin logged in', async (done) => {
+    await request(app)
+      .post('/api/user/signup')
+      .send(adminUser);
+    const token = await login(adminUser);
+    const res = await request(app)
+      .post('/api/product/create')
+      .set('Authorization', `Bearer ${token}`)
       .send(product)
       .expect(201);
     expect(res.body.product).toBeTruthy();
@@ -88,41 +139,61 @@ describe('POST /api/product/create', () => {
 
 describe('POST /api/product/update/:productId', () => {
   it('should not update product if product does not exist', async (done) => {
+    await request(app)
+      .post('/api/user/signup')
+      .send(adminUser);
+    const token = await login(adminUser);
     const newProduct = await createProduct(product);
     const productId = newProduct.id;
     const faultyId = `${productId}q`;
     const res = await request(app)
-      .post(`/api/product/update/${faultyId}`);
-    console.log(res.body);
+      .post(`/api/product/update/${faultyId}`)
+      .set('Authorization', `Bearer ${token}`);
     expect(res.body.message).toBe('Product not found in database');
     done();
   });
   it('should delete product from dB', async () => {
+    await request(app)
+      .post('/api/user/signup')
+      .send(adminUser);
+    const token = await login(adminUser);
     const newProduct = await createProduct(product);
     const productId = newProduct.id;
     const res = await request(app)
-      .post(`/api/product/update/${productId}`);
+      .post(`/api/product/update/${productId}`)
+      .set('Authorization', `Bearer ${token}`);
     expect(res.body.message).toBe('Product database successfully updated');
   });
 });
 
 describe('Delete product', () => {
-  it('should delete product from dB', async () => {
+  it('should not delete product from dB', async () => {
+    await request(app)
+      .post('/api/user/signup')
+      .send(adminUser);
+    const token = await login(adminUser);
     const newProduct = await createProduct(product);
     const productId = newProduct.id;
     const faultyId = `${productId}q`;
     const res = await request(app)
-      .post(`/api/product/update/${faultyId}`);
+      .post(`/api/product/update/${faultyId}`)
+      .set('Authorization', `Bearer ${token}`);
     expect(res.body.message).toBe('Product not found in database');
   });
   it('should delete product from dB', async () => {
+    await request(app)
+      .post('/api/user/signup')
+      .send(adminUser);
+    const token = await login(adminUser);
     const newProduct = await createProduct(product);
     const productId = newProduct.id;
     const res = await request(app)
-      .delete(`/api/product/delete/${productId}`);
+      .delete(`/api/product/delete/${productId}`)
+      .set('Authorization', `Bearer ${token}`);
     expect(res.body.message).toBe('Product successfully deleted from database');
   });
 });
+
 async function removeAllCollections() {
   const collections = Object.keys(mongoose.connection.collections);
   for (const collectionName of collections) {
