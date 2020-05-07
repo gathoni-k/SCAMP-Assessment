@@ -20,6 +20,7 @@ npm install
 npm test
 ```
 
-``` Start Project
+### Start Project
+``` JavaScript
 node index
 ```
