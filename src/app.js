@@ -17,6 +17,6 @@ app.use(express.urlencoded({ extended: false }));
 // routes
 app.use('/api/user', routes.userRoutes);
 app.use('/api/product', routes.productRoutes);
-
+app.use('/api/order', routes.orderRoutes);
 
 module.exports = app;
