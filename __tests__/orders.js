@@ -134,7 +134,6 @@ describe('Update order', () => {
     try {
       const newOrder = await placeOrder(order, salesUser);
       const res = await updateOrder(newOrder.id, update);
-      console.log(res);
       expect(res.amountOrdered).toBe(50);
       done();
     } catch (error) {
