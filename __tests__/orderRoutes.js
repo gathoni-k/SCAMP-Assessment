@@ -74,8 +74,7 @@ describe('GET /order/all', () => {
   it('should not return all orders', async (done) => {
     const res = await request(app)
       .get('/api/order/all')
-      .expect(404)
-    console.log(res.body)
+      .expect(404);
     expect(res.body.orders).toBe(null);
     done();
   });
