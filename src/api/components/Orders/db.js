@@ -57,5 +57,16 @@ module.exports = {
         error: error.message
       };
     }
+  },
+  getAll: async () => {
+    try {
+      const orders = await Order.find({});
+      if (!orders) {
+        throw new Error();
+      }
+      return orders;
+    } catch (error) {
+      return false;
+    }
   }
 };
